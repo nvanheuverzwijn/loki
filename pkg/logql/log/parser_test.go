@@ -720,6 +720,55 @@ func Test_logfmtParser_Parse(t *testing.T) {
 	}
 }
 
+func Test_syslogParser_Parse(t *testing.T) {
+	tests := []struct {
+		name string
+		line []byte
+		lbs  labels.Labels
+		want labels.Labels
+	}{
+		{
+			"not syslog",
+			[]byte("not a syslog"),
+			labels.Labels{
+				{Name: "foo", Value: "bar"},
+			},
+			labels.Labels{
+				{Name: "foo", Value: "bar"},
+				{Name: logqlmodel.ErrorLabel, Value: errLogfmt},
+			},
+		},
+		{
+			"syslog without structured data",
+			[]byte("<14>1 2020-01-01T05:10:20.841485+01:00 localhost loki 5252 id12345 - This is an interesting message"),
+			labels.Labels{},
+			labels.Labels{
+				{Name: "buzz", Value: "foo"},
+				{Name: "bar", Value: ""},
+			},
+		},
+		{
+			"syslog with structured data",
+			[]byte("<14>1 2020-01-01T05:10:20.841485+01:00 localhost loki 5252 id12345 [id@12345=foo] This is an interesting message"),
+			labels.Labels{},
+			labels.Labels{
+				{Name: "buzz", Value: "foo"},
+				{Name: "bar", Value: ""},
+			},
+		},
+	}
+	p := NewSyslogParser()
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			b := NewBaseLabelsBuilder().ForLabels(tt.lbs, tt.lbs.Hash())
+			b.Reset()
+			_, _ = p.Process(tt.line, b)
+			sort.Sort(tt.want)
+			require.Equal(t, tt.want, b.Labels())
+		})
+	}
+}
+
 func Test_unpackParser_Parse(t *testing.T) {
 	tests := []struct {
 		name string

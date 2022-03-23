@@ -247,7 +247,7 @@ func (t *SyslogTarget) handleMessage(connLabels labels.Labels, msg syslog.Messag
 
 	if t.config.LabelStructuredData && rfc5424Msg.StructuredData != nil {
 		for id, params := range *rfc5424Msg.StructuredData {
-			id = strings.Replace(id, "@", "_", -1)
+			id = strings.ReplaceAll(id, "@", "_")
 			for name, value := range params {
 				key := "__syslog_message_sd_" + id + "_" + name
 				lb.Set(key, value)
