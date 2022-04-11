@@ -208,7 +208,7 @@ present in your Loki config: `ingestion_rate_strategy`, `max_global_streams_per_
 | --- | --- | --- |
 | chunk_retain_period | 30s | 0s |
 | chunk_idle_period | 1h | 30m |
-| chunk_target_size | 1048576 | 1572864 |
+| chunk_target_size | 1572864 | 1048576 |
 
 * chunk_retain_period is necessary when using an index queries cache which is not enabled by default. If you have configured an index_queries_cache_config section make sure that you set chunk_retain_period larger than your cache TTL
 * chunk_idle_period is how long before a chunk which receives no logs is flushed.
